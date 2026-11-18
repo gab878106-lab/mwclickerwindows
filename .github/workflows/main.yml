@@ -1,0 +1,46 @@
+
+name: Build MW Clicker Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "MW-Clicker-Windows-Cloud-Build/**"
+      - ".github/workflows/azure-functions-app-nodejs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Compile Windows application
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: MW-Clicker-Windows-Cloud-Build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows EXE
+        run: npm run dist
+
+      - name: Upload Windows installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: MW-Clicker-Windows
+          path: MW-Clicker-Windows-Cloud-Build/dist/*
+          if-no-files-found: error
+          retention-days: 14
